@@ -18,10 +18,13 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'franz',
             'email' => 'franz@example.com',
-            'password' => ' ',
+            'password' => 'password',
         ]);
 
-        $this->call([
+       $this->call([
+            SupplierSeeder::class,
+            CLTLayupSeeder::class,
+            CLTLayerSeeder::class,
         ]);
     }
 }
