@@ -68,7 +68,7 @@
                     @foreach ($suppliers as $supplier)
                         <tr
                             class="hover:bg-green-100 cursor-pointer"
-                            onclick="window.location='{{ route('suppliers.show', $supplier) }}'"
+                            onclick="window.location='{{ route('suppliers.show', $supplier->ext_id) }}'"
                         >
                             <td class="px-6 py-4 flex items-center gap-3">
                                 <div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
@@ -105,7 +105,6 @@
 
             <h2 class="text-lg font-semibold mb-4">Create Supplier</h2>
 
-            <!-- INPUT -->
             <div class="mb-4">
                 <label class="block text-sm mb-1">Name</label>
                 <input
@@ -116,8 +115,6 @@
                     required
                 >
             </div>
-
-            <!-- ACTION -->
             <div class="flex justify-end gap-2">
                 <button
                     type="button"

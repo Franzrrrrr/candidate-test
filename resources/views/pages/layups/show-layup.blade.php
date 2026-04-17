@@ -4,10 +4,9 @@
 
     <!-- BREADCRUMB -->
     <p class="text-sm text-gray-400 mb-4">
-        <a href="{{ route('dashboard') }}" class="hover:underline">Home</a> /
-        <a href="{{ route('suppliers') }}" class="hover:underline">Suppliers</a> /
-        <a href="{{ route('suppliers.show', $supplier) }}" class="hover:underline">{{ $supplier->name }}</a> /
-        {{ $layup->name }}
+        <a href="{{ route('dashboard') }}" class="hover:underline">Home</a> / 
+        <a href="{{ route('suppliers.show', $supplier) }}" class="hover:underline">{{ $supplier->name }}</a> / 
+        Layups / {{ $layup->name }}
     </p>
 
     <!-- HEADER CARD -->
@@ -24,14 +23,8 @@
             </div>
 
             <p class="text-sm text-gray-400 mt-1">
-                {{ $layup->cltLayers->count() }}-layer panel &mdash; {{ $supplier->name }}
+                Standard {{ $layup->cltLayers->count() }}-layer panel.
             </p>
-        </div>
-
-        <div class="flex gap-2">
-            <a href="{{ route('suppliers.show', $supplier) }}" class="px-4 py-2 border rounded-lg text-sm hover:bg-gray-100">
-                &larr; Back
-            </a>
         </div>
 
     </div>
@@ -45,7 +38,7 @@
 
         <div class="bg-white p-4 rounded-lg shadow-sm">
             <p class="text-xs text-gray-400">Last Modified</p>
-            <p class="text-sm text-gray-700">{{ $layup->updated_at ? $layup->updated_at->format('M d, Y') : '-' }}</p>
+            <p class="text-sm text-gray-700">{{ $layup->updated_at->format('M d, Y') }}</p>
         </div>
 
         <div class="bg-white p-4 rounded-lg shadow-sm">
@@ -64,10 +57,9 @@
             {{ session('success') }}
         </div>
     @endif
-
     @if($errors->any())
         <div class="bg-red-100 text-red-700 p-4 rounded mt-4">
-            <ul class="list-disc pl-5 text-sm">
+            <ul class="list-disc pl-5">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -108,20 +100,18 @@
                                 <td class="px-4 py-3">{{ $layer->layer_order }}</td>
                                 <td class="px-4 py-3">{{ number_format($layer->thickness, 2) }}mm</td>
                                 <td class="px-4 py-3">{{ number_format($layer->width, 2) }}mm</td>
-                                <td class="px-4 py-3 {{ $layer->angle == 0 ? 'text-green-600' : 'text-orange-500' }}">{{ $layer->angle }}°</td>
+                                <td class="px-4 py-3 text-{{ $layer->angle == 0 ? 'green-600' : 'orange-500' }}">{{ $layer->angle }}°</td>
                                 <td class="px-4 py-3 text-right">
                                     <form action="{{ route('layers.destroy', [$layup, $layer]) }}" method="POST" class="inline" onsubmit="return confirm('Delete this layer?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs">Delete</button>
+                                        <button type="submit" class="text-red-600 hover:text-red-800 text-xs">Delete</button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-6 text-center text-gray-400 text-xs">
-                                    No layers yet. Click "+ Add Layer" to get started.
-                                </td>
+                                <td colspan="5" class="px-4 py-3 text-center text-gray-500 text-xs">No layers found.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -139,7 +129,7 @@
                     Engineering Note
                 </p>
                 <p class="text-xs text-gray-400">
-                    Ensure bonding pressure is adjusted for varying layer configurations.
+                    Ensure bonding pressure is adjusted for varying layer grades.
                     Verify alignment of 90° transverse layers.
                 </p>
             </div>
@@ -152,10 +142,9 @@
                 <h2 class="text-md font-semibold text-gray-700">
                     Structure Visualizer
                 </h2>
-                <div class="text-xs text-gray-400 flex items-center gap-2">
-                    <span class="inline-block w-3 h-3 bg-yellow-200 border border-gray-300 rounded-sm"></span> Longitudinal (0°)
-                    &nbsp;
-                    <span class="inline-block w-3 h-3 bg-orange-300 border border-gray-300 rounded-sm"></span> Transverse (90°)
+                <div class="text-xs text-gray-400">
+                    <span class="inline-block w-3 h-3 bg-yellow-200 border border-gray-300 mr-1"></span> Longitudinal (0°) &nbsp;&nbsp; 
+                    <span class="inline-block w-3 h-3 bg-orange-300 border border-gray-300 mr-1"></span> Transverse (90°)
                 </div>
             </div>
 
@@ -165,15 +154,13 @@
                     @forelse ($layup->cltLayers->sortBy('layer_order') as $layer)
                         @php
                             $bgClass = $layer->angle == 0 ? 'bg-yellow-200' : 'bg-orange-300';
-                            $py = $layer->thickness >= 40 ? 'py-4' : ($layer->thickness >= 20 ? 'py-2' : 'py-1');
+                            $paddingClass = $layer->thickness >= 40 ? 'py-4' : ($layer->thickness >= 20 ? 'py-2' : 'py-1');
                         @endphp
-                        <div class="{{ $bgClass }} {{ $py }} text-center rounded text-xs border border-gray-300">
+                        <div class="{{ $bgClass }} text-center {{ $paddingClass }} rounded text-xs border border-gray-300 shadow-sm">
                             L{{ $layer->layer_order }} ({{ number_format($layer->thickness, 2) }}mm)
                         </div>
                     @empty
-                        <div class="text-center text-gray-400 text-xs py-6">
-                            No layers to visualize.
-                        </div>
+                        <div class="text-center text-gray-400 text-sm py-4">No layers to visualize</div>
                     @endforelse
                 </div>
 
@@ -188,7 +175,7 @@
 
 </div>
 
-<!-- Add Layer Modal -->
+<!-- Modal for adding a layer -->
 <x-modal name="add-layer">
     <form method="POST" action="{{ route('layers.store', $layup) }}" class="p-6">
         @csrf
@@ -211,8 +198,8 @@
             <div>
                 <label class="block text-sm mb-1">Angle (°)</label>
                 <select name="angle" class="w-full border rounded p-2" required>
-                    <option value="0">0° — Longitudinal</option>
-                    <option value="90">90° — Transverse</option>
+                    <option value="0">0°</option>
+                    <option value="90">90°</option>
                 </select>
             </div>
         </div>

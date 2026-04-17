@@ -3,28 +3,38 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\SupplierService;
 
 class SupplierController extends Controller
 {
-    function index()
+    protected $supplierService;
+
+    public function __construct(SupplierService $supplierService)
     {
-        $suppliers = \App\Models\Supplier::all();
+        $this->supplierService = $supplierService;
+    }
+
+    public function index()
+    {
+        $suppliers = $this->supplierService->getAllSuppliers();
         return view('pages.suppliers.suppliers', ['suppliers' => $suppliers]);
     }
 
-    function show(\App\Models\Supplier $supplier)
+    public function show(\App\Models\Supplier $supplier)
     {
-        return view('pages.suppliers.show-supplier', ['supplier' => $supplier]);
+        $layups = $supplier->load('cltLayups');
+        return view('pages.suppliers.show-supplier', ['supplier' => $supplier, 'layups' => $layups]);
     }
 
-    function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required',
         ]);
 
-        \App\Models\Supplier::create([
+        $this->supplierService->createSupplier([
             'name' => $request->name,
+            // 'ext_id' is nullable or handled if needed
         ]);
 
         return redirect()->route('suppliers')->with('success', 'Supplier created successfully.');

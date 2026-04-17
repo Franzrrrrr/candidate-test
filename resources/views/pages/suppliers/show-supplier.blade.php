@@ -5,7 +5,7 @@
 
         <!-- Breadcrumb -->
         <p class="text-sm text-gray-400 mb-3">
-            Suppliers / Nordic Structures Inc.
+            Suppliers / {{$supplier->name}}
         </p>
 
         <!-- Card Header -->
@@ -13,14 +13,14 @@
             <div>
                 <div class="flex items-center gap-3">
                     <h1 class="text-xl font-semibold text-gray-800">
-                        Nordic Structures Inc.
+                        {{$supplier->name}}
                     </h1>
                     <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                         Active Partner
                     </span>
                 </div>
                 <p class="text-sm text-gray-400 mt-1">
-                    ID: SUP-2024-001
+                    ID: {{$supplier->ext_id}}
                 </p>
             </div>
 
@@ -30,7 +30,7 @@
         </div>
 
         <!-- INFO GRID -->
-        <div class="grid grid-cols-4 gap-4 mt-4">
+        <!-- <div class="grid grid-cols-4 gap-4 mt-4">
 
             <div class="bg-white p-4 rounded-lg shadow-sm">
                 <p class="text-xs text-gray-400 mb-1">Primary Contact</p>
@@ -52,7 +52,7 @@
                 <p class="text-sm text-gray-700">Oct 12, 2023</p>
             </div>
 
-        </div>
+        </div> -->
 
         <!-- LAYUPS HEADER -->
         <div class="flex items-center justify-between mt-8 mb-3">
@@ -61,20 +61,51 @@
             </h2>
 
             <div class="flex gap-2">
-                <button class="px-3 py-2 border rounded-lg text-sm hover:bg-gray-100">
+                <button x-data x-on:click="$dispatch('open-modal', 'import-layup')" class="px-3 py-2 border rounded-lg text-sm hover:bg-gray-100">
                     Import
                 </button>
-                <button class="px-3 py-2 border rounded-lg text-sm hover:bg-gray-100">
+                <a href="{{ route('suppliers.export', $supplier) }}" target="_blank" class="px-3 py-2 border rounded-lg text-sm hover:bg-gray-100 inline-block">
                     Export
-                </button>
-                <button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
-                    + Add Layup
-                </button>
+                </a>
+                <button
+                class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700"
+                x-data
+                x-on:click="$dispatch('open-modal', 'create-layup')"
+            >
+                + Add Layup
+            </button>
             </div>
         </div>
 
+        @if(session('success'))
+            <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if(session('conflicts'))
+            <div class="bg-yellow-100 text-yellow-800 p-4 rounded mb-4">
+                <p class="font-bold">Conflicts detected during import:</p>
+                <ul class="list-disc pl-5">
+                    @foreach(session('conflicts') as $conflict)
+                        <li>Layup: {{ $conflict['layup_name'] }}, Layer Order: {{ $conflict['layer_order'] }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if(session('manual_conflicts'))
+            <x-conflict-resolution-modal :conflicts="session('manual_conflicts')" :supplier="$supplier" />
+        @endif
+
         <!-- TABLE -->
-        {{-- <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
             <table class="w-full text-sm">
 
                 <!-- HEAD -->
@@ -82,11 +113,6 @@
                     <tr>
                         <th class="px-6 py-3 text-left">Layup ID</th>
                         <th class="px-6 py-3 text-left">Name</th>
-                        <th class="px-6 py-3">Thickness</th>
-                        <th class="px-6 py-3">Ply Count</th>
-                        <th class="px-6 py-3">Species/Grade</th>
-                        <th class="px-6 py-3">Revision</th>
-                        <th class="px-6 py-3">Status</th>
                         <th class="px-6 py-3 text-right">Actions</th>
                     </tr>
                 </thead>
@@ -94,80 +120,261 @@
                 <!-- BODY -->
                 <tbody class="divide-y">
 
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">L-204-A</td>
-                        <td class="px-6 py-4">Standard 3-Ply Wall</td>
-                        <td class="px-6 py-4 text-center">105mm</td>
-                        <td class="px-6 py-4 text-center">3</td>
-                        <td class="px-6 py-4">Spruce / No. 2</td>
-                        <td class="px-6 py-4 text-xs text-gray-400">Rev 2 (Oct 10)</td>
-                        <td class="px-6 py-4">
-                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                                Active
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right">•••</td>
-                    </tr>
-
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">L-204-B</td>
-                        <td class="px-6 py-4">Heavy Floor Panel</td>
-                        <td class="px-6 py-4 text-center">175mm</td>
-                        <td class="px-6 py-4 text-center">5</td>
-                        <td class="px-6 py-4">Spruce / Select</td>
-                        <td class="px-6 py-4 text-xs text-gray-400">Rev 1 (Sep 22)</td>
-                        <td class="px-6 py-4">
-                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                                Active
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right">•••</td>
-                    </tr>
-
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">L-500-X</td>
-                        <td class="px-6 py-4">Custom Span Beam</td>
-                        <td class="px-6 py-4 text-center">245mm</td>
-                        <td class="px-6 py-4 text-center">7</td>
-                        <td class="px-6 py-4">Pine / No. 1</td>
-                        <td class="px-6 py-4 text-xs text-gray-400">Draft v2</td>
-                        <td class="px-6 py-4">
-                            <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">
-                                Draft
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right">•••</td>
-                    </tr>
-
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4">L-205-C</td>
-                        <td class="px-6 py-4">Standard 3-Ply Floor</td>
-                        <td class="px-6 py-4 text-center">105mm</td>
-                        <td class="px-6 py-4 text-center">3</td>
-                        <td class="px-6 py-4">Spruce / No. 2</td>
-                        <td class="px-6 py-4 text-xs text-gray-400">Rev 1 (Jan 15)</td>
-                        <td class="px-6 py-4">
-                            <span class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-full">
-                                Archived
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-right">•••</td>
-                    </tr>
+                    @foreach ($layups->cltLayups as $layup)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4">{{ $layup->id }}</td>
+                            <td class="px-6 py-4">
+                                <a href="{{ route('layups.show', [$supplier, $layup]) }}" class="text-blue-600 hover:underline">
+                                    {{ $layup->name }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 text-right flex items-center justify-end gap-3">
+                                <a href="{{ route('inventory', [$supplier, $layup]) }}" class="text-green-600 hover:underline text-sm">View Layers</a>
+                                <form action="{{ route('layups.destroy', [$supplier, $layup]) }}" method="POST" onsubmit="return confirm('Delete this layup?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
 
                 </tbody>
             </table>
-
-            <!-- FOOTER -->
-            <div class="flex justify-between items-center px-6 py-4 text-sm text-gray-400">
-                <p>Showing 4 of 12 layups</p>
-                <div class="flex gap-2">
-                    <button class="px-2 py-1 border rounded">‹</button>
-                    <button class="px-2 py-1 border rounded">›</button>
-                </div>
-            </div>
-
-        </div> --}}
+        </div>
 
     </div>
 
+    <!-- <x-modal name="import-layup">
+        <form method="POST" action="{{ route('suppliers.import', $supplier) }}" enctype="multipart/form-data" class="p-6">
+            @csrf
+
+            <h2 class="text-lg font-semibold mb-4">Import Layups</h2>
+
+            <div class="mb-4">
+                <label class="block text-sm mb-1">JSON File</label>
+                <input
+                    type="file"
+                    name="import_file"
+                    accept=".json,application/json"
+                    class="w-full border rounded p-2"
+                    required
+                >
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm mb-1">Conflict Resolution</label>
+                <select name="conflict_resolution" class="w-full border rounded p-2">
+                    <option value="reject">Reject Import</option>
+                    <option value="overwrite">Overwrite Existing</option>
+                    <option value="skip">Skip Conflict</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button
+                    type="button"
+                    class="px-4 py-2 border rounded"
+                    x-on:click="$dispatch('close-modal', 'import-layup')"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                    Import
+                </button>
+            </div>
+        </form>
+    </x-modal> -->
+
+    <x-modal name="import-layup" maxWidth="2xl">
+        <form method="POST"
+            action="{{ route('suppliers.import', $supplier) }}"
+            enctype="multipart/form-data"
+            class="p-0">
+
+            @csrf
+
+            <!-- HEADER -->
+            <div class="px-6 py-5 border-b flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-800">
+                        Import Layup Data
+                    </h2>
+                    <p class="text-sm text-gray-400 mt-1">
+                        Upload JSON / CSV file for supplier layups.
+                    </p>
+                </div>
+
+                <button type="button"
+                    x-on:click="$dispatch('close-modal', 'import-layup')"
+                    class="text-gray-400 hover:text-gray-700 text-xl">
+                    ×
+                </button>
+            </div>
+
+            <!-- BODY -->
+            <div class="p-6 space-y-5">
+
+                <!-- Upload Area -->
+                <div x-data="{ fileName: '' }">
+
+                    <label
+                        class="border-2 border-dashed border-gray-300 rounded-xl p-8 block cursor-pointer hover:border-green-500 transition">
+
+                        <input
+                            type="file"
+                            name="import_file"
+                            accept=".json,.csv"
+                            class="hidden"
+                            required
+                            @change="fileName = $event.target.files[0].name"
+                        >
+
+                        <div class="text-center">
+                            <div class="text-3xl mb-2">📤</div>
+
+                            <p class="text-sm text-gray-700 font-medium">
+                                Click to upload
+                            </p>
+
+                            <p class="text-xs text-gray-400 mt-1" x-show="!fileName">
+                                CSV or JSON up to 10MB
+                            </p>
+
+                            <p class="text-sm text-green-600 mt-2 font-medium" x-text="fileName" x-show="fileName"></p>
+                        </div>
+
+                    </label>
+
+                </div>
+
+                <!-- Conflict Strategy -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Conflict Resolution Strategy
+                    </label>
+
+                    <select
+                        name="conflict_resolution"
+                        class="w-full border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500">
+
+                        <option value="skip">
+                            Skip conflicts (Default)
+                        </option>
+
+                        <option value="overwrite">
+                            Overwrite Existing
+                        </option>
+
+                        <option value="duplicate">
+                            Duplicate Layup
+                        </option>
+
+                        <option value="manual">
+                            Manual Resolution
+                        </option>
+
+                        <option value="reject">
+                            Reject Entire Import
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- Dry Run -->
+                <label
+                    class="flex items-start gap-3 border rounded-lg px-4 py-3 cursor-pointer">
+
+                    <input
+                        type="checkbox"
+                        name="dry_run"
+                        value="1"
+                        class="mt-1 rounded border-gray-300">
+
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">
+                            Run as Dry Run
+                        </p>
+
+                        <p class="text-xs text-gray-400">
+                            Preview the import process without saving changes.
+                        </p>
+                    </div>
+
+                </label>
+
+                <!-- Warning -->
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p class="text-sm font-semibold text-red-700">
+                        Potential Conflicts Detected
+                    </p>
+
+                    <p class="text-xs text-red-500 mt-1">
+                        Existing layups with same names may trigger conflict resolution.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="px-6 py-4 border-t flex justify-end gap-3">
+
+                <button
+                    type="button"
+                    x-on:click="$dispatch('close-modal', 'import-layup')"
+                    class="px-4 py-2 border rounded-lg text-sm hover:bg-gray-100">
+
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+
+                    Confirm Import
+                </button>
+
+            </div>
+
+        </form>
+    </x-modal>
+
+    <x-modal name="create-layup">
+        <form method="POST" action="{{ route('layups.store', $supplier) }}" class="p-6">
+            @csrf
+
+            <h2 class="text-lg font-semibold mb-4">Create Layup</h2>
+
+            <div class="mb-4">
+                <label class="block text-sm mb-1">Name</label>
+                <input
+                    type="text"
+                    name="name"
+                    class="w-full border rounded p-2"
+                    placeholder="Layup name..."
+                    required
+                >
+            </div>
+            <div class="flex justify-end gap-2">
+                <button
+                    type="button"
+                    class="px-4 py-2 border rounded"
+                    x-on:click="$dispatch('close-modal', 'create-layup')"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="px-4 py-2 bg-green-600 text-white rounded"
+                >
+                    Create
+                </button>
+            </div>
+        </form>
+    </x-modal>
 </x-app-layout>
