@@ -33,6 +33,7 @@ class ImportExportService
 
     public function importBySupplier($supplierId, array $data, $conflictResolution = 'reject', $isDryRun = false)
     {
+        // dd([$supplierId,'data' => $data, 'conflictResolution' => $conflictResolution, 'isDryRun' => $isDryRun]);
         // conflictResolution: reject, overwrite, skip, duplicate, manual
 
         $supplier = $this->supplierRepo->find($supplierId);
@@ -45,12 +46,18 @@ class ImportExportService
             'conflicts' => []
         ];
 
-        // Pre-check for conflicts if strategy is reject or manual
-        if ($conflictResolution === 'reject' || $conflictResolution === 'manual') {
-            $conflicts = $this->detectConflicts($supplierId, $importedLayups);
-            if (!empty($conflicts)) {
-                return ['success' => false, 'conflicts' => $conflicts];
-            }
+        // Always detect conflicts first
+        $conflicts = $this->detectConflicts($supplierId, $importedLayups);
+        // dd($conflicts);
+
+        // If conflicts exist and strategy is reject, return conflicts
+        if ($conflictResolution === 'reject' && !empty($conflicts)) {
+            return ['success' => false, 'conflicts' => $conflicts];
+        }
+
+        // If conflicts exist and strategy is manual, return conflicts for resolution
+        if ($conflictResolution === 'manual' && !empty($conflicts)) {
+            return ['success' => false, 'conflicts' => $conflicts];
         }
 
         if (!$isDryRun) {
@@ -145,7 +152,8 @@ class ImportExportService
                 DB::commit();
             }
 
-            if ($conflictResolution === 'manual' && !empty($results['conflicts'])) {
+            // Always return conflicts for modal display if any exist
+            if (!empty($results['conflicts'])) {
                 return ['success' => false, 'conflicts' => $results['conflicts'], 'dry_run' => $isDryRun];
             }
 
@@ -168,7 +176,6 @@ class ImportExportService
             if ($layup && isset($importedLayup['clt_layers'])) {
                 foreach ($importedLayup['clt_layers'] as $importedLayer) {
                     $layer = $this->layerRepo->findByOrderAndLayup($importedLayer['layer_order'], $layup->id);
-
                     if ($layer && $this->isLayerConflict($layer, $importedLayer)) {
                         $conflicts[] = [
                             'layup_name' => $layup->name,
@@ -189,6 +196,7 @@ class ImportExportService
             }
         }
 
+
         return $conflicts;
     }
 
@@ -196,9 +204,9 @@ class ImportExportService
     {
         // If layer_order matches AND (thickness OR width OR angle) differ
         return (
-            (float) $existingLayer->thickness !== (float) $importedLayer['thickness'] ||
-            (float) $existingLayer->width !== (float) $importedLayer['width'] ||
-            (float) $existingLayer->angle !== (float) $importedLayer['angle']
+            (float) $existingLayer->thickness == (float) $importedLayer['thickness'] &&
+            (float) $existingLayer->width == (float) $importedLayer['width'] &&
+            (float) $existingLayer->angle == (float) $importedLayer['angle']
         );
     }
 

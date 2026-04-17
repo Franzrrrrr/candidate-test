@@ -1,0 +1,62 @@
+{
+  "clt_layups": [
+    {
+      "name": "CLT-5-150-L",
+      "clt_layers": [
+        {
+          "layer_order": 1,
+          "thickness": 25,
+          "width": 200,
+          "angle": 0
+        },
+        {
+          "layer_order": 2,
+          "thickness": 35,
+          "width": 200,
+          "angle": 0
+        },
+        {
+          "layer_order": 3,
+          "thickness": 25,
+          "width": 200,
+          "angle": 0
+        },
+        {
+          "layer_order": 4,
+          "thickness": 35,
+          "width": 200,
+          "angle": 0
+        },
+        {
+          "layer_order": 5,
+          "thickness": 25,
+          "width": 200,
+          "angle": 0
+        }
+      ]
+    },
+    {
+      "name": "CLT-3-120-S",
+      "clt_layers": [
+        {
+          "layer_order": 1,
+          "thickness": 40,
+          "width": 200,
+          "angle": 0
+        },
+        {
+          "layer_order": 2,
+          "thickness": 40,
+          "width": 200,
+          "angle": 0
+        },
+        {
+          "layer_order": 3,
+          "thickness": 40,
+          "width": 200,
+          "angle": 0
+        }
+      ]
+    }
+  ]
+}

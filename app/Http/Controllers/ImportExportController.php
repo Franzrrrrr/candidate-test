@@ -28,7 +28,6 @@ class ImportExportController extends Controller
             'dry_run' => 'nullable|boolean',
         ]);
 
-        // dd($request->all());
 
 
         $file = $request->file('import_file');
@@ -36,6 +35,7 @@ class ImportExportController extends Controller
 
         // Handle both JSON and CSV files
         $data = $this->parseImportFile($file, $fileContent);
+
 
         if ($data === false) {
             return redirect()->back()->with('error', 'Invalid file format. Please upload a valid JSON or CSV file.');
@@ -45,19 +45,26 @@ class ImportExportController extends Controller
         $isDryRun = $request->boolean('dry_run', false);
 
         $result = $this->importExportService->importBySupplier($supplier->id, $data, $resolution, $isDryRun);
-        dd($result);
 
         if (isset($result['success']) && $result['success']) {
             $message = $isDryRun ? 'Dry run completed successfully.' : 'Import completed successfully.';
             return redirect()->back()->with('success', $message);
         }
 
-        if (isset($result['conflicts']) && $resolution === 'manual') {
-            return redirect()->back()->with('manual_conflicts', $result['conflicts']);
-        }
-
+        // If conflicts detected, always show the modal for manual resolution
         if (isset($result['conflicts'])) {
-            return redirect()->back()->with('conflicts', $result['conflicts']);
+            // If user chose automatic resolution, apply it first
+            if ($resolution !== 'manual' && $resolution !== 'reject') {
+                // Apply automatic resolution and show results
+                $autoResult = $this->importExportService->importBySupplier($supplier->id, $data, $resolution, false);
+                if (isset($autoResult['success']) && $autoResult['success']) {
+                    $message = "Import completed with automatic conflict resolution. {$autoResult['results']['layers_updated']} conflicts resolved.";
+                    return redirect()->back()->with('success', $message);
+                }
+            }
+
+            // For manual resolution or reject, show the conflict modal
+            return redirect()->back()->with('manual_conflicts', $result['conflicts']);
         }
 
         return redirect()->back()->with('error', 'An unknown error occurred during import.');
