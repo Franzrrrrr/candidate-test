@@ -178,6 +178,7 @@ class ImportExportService
                     $layer = $this->layerRepo->findByOrderAndLayup($importedLayer['layer_order'], $layup->id);
                     if ($layer && $this->isLayerConflict($layer, $importedLayer)) {
                         $conflicts[] = [
+                            'layer_id' => $layer->id,
                             'layup_name' => $layup->name,
                             'layer_order' => $layer->layer_order,
                             'existing' => [
@@ -204,9 +205,9 @@ class ImportExportService
     {
         // If layer_order matches AND (thickness OR width OR angle) differ
         return (
-            (float) $existingLayer->thickness == (float) $importedLayer['thickness'] &&
-            (float) $existingLayer->width == (float) $importedLayer['width'] &&
-            (float) $existingLayer->angle == (float) $importedLayer['angle']
+            (float) $existingLayer->thickness != (float) $importedLayer['thickness'] ||
+            (float) $existingLayer->width != (float) $importedLayer['width'] ||
+            (float) $existingLayer->angle != (float) $importedLayer['angle']
         );
     }
 

@@ -24,7 +24,7 @@
             </div>
 
             <p class="text-sm text-gray-400 mt-1">
-                {{ $layup->cltLayers->count() }}-layer panel &mdash; {{ $supplier->name }}
+                {{ $layers->count() }}-layer panel &mdash; {{ $supplier->name }}
             </p>
         </div>
 
@@ -50,12 +50,12 @@
 
         <div class="bg-white p-4 rounded-lg shadow-sm">
             <p class="text-xs text-gray-400">Total Thickness</p>
-            <p class="text-sm text-green-600 font-semibold">{{ number_format($layup->cltLayers->sum('thickness'), 2) }}mm</p>
+            <p class="text-sm text-green-600 font-semibold">{{ number_format($layers->sum('thickness'), 2) }}mm</p>
         </div>
 
         <div class="bg-white p-4 rounded-lg shadow-sm">
             <p class="text-xs text-gray-400">Total Layers</p>
-            <p class="text-sm text-green-600 font-semibold">{{ $layup->cltLayers->count() }} Layers</p>
+            <p class="text-sm text-green-600 font-semibold">{{ $layers->total() }} Layers</p>
         </div>
     </div>
 
@@ -103,7 +103,7 @@
                     </thead>
 
                     <tbody class="divide-y">
-                        @forelse ($layup->cltLayers->sortBy('layer_order') as $layer)
+                        @forelse ($layers as $layer)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3">{{ $layer->layer_order }}</td>
                                 <td class="px-4 py-3">{{ number_format($layer->thickness, 2) }}mm</td>
@@ -127,10 +127,22 @@
                     </tbody>
                 </table>
 
-                <div class="flex justify-between px-4 py-3 text-xs text-gray-400">
-                    <p>Showing {{ $layup->cltLayers->count() }} layers</p>
-                    <p>Calculated Sum: {{ number_format($layup->cltLayers->sum('thickness'), 2) }} mm</p>
-                </div>
+                <!-- Pagination for Layers -->
+                @if($layers->hasPages())
+                    <div class="flex items-center justify-between px-4 py-3 text-xs text-gray-400 border-t">
+                        <p>
+                            Showing {{ $layers->firstItem() ?? 0 }} to {{ $layers->lastItem() ?? 0 }}
+                            of {{ $layers->total() }} layers
+                        </p>
+
+                        {{ $layers->links() }}
+                    </div>
+                @else
+                    <div class="flex justify-between px-4 py-3 text-xs text-gray-400">
+                        <p>Showing {{ $layers->count() }} layers</p>
+                        <p>Calculated Sum: {{ number_format($layers->sum('thickness'), 2) }} mm</p>
+                    </div>
+                @endif
             </div>
 
             <!-- NOTE -->
@@ -162,7 +174,7 @@
             <div class="bg-white rounded-lg shadow-sm p-6 flex justify-center">
 
                 <div class="w-48 space-y-1">
-                    @forelse ($layup->cltLayers->sortBy('layer_order') as $layer)
+                    @forelse ($layers as $layer)
                         @php
                             $bgClass = $layer->angle == 0 ? 'bg-yellow-200' : 'bg-orange-300';
                             $py = $layer->thickness >= 40 ? 'py-4' : ($layer->thickness >= 20 ? 'py-2' : 'py-1');
@@ -198,7 +210,7 @@
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
                 <label class="block text-sm mb-1">Order</label>
-                <input type="number" name="layer_order" class="w-full border rounded p-2" value="{{ $layup->cltLayers->count() + 1 }}" required>
+                <input type="number" name="layer_order" class="w-full border rounded p-2" value="{{ $layers->count() + 1 }}" required>
             </div>
             <div>
                 <label class="block text-sm mb-1">Thickness (mm)</label>

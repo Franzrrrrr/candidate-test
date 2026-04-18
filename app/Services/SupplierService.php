@@ -18,11 +18,16 @@ class SupplierService
         return $this->supplierRepository->all();
     }
 
+    public function getPaginatedSuppliers($perPage = 10)
+    {
+        return $this->supplierRepository->paginate($perPage);
+    }
+
     public function getSupplierById($id)
     {
         return $this->supplierRepository->find($id);
     }
-    
+
     public function getSupplierByExtId($extId)
     {
         return $this->supplierRepository->findByExtId($extId);

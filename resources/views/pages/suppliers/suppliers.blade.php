@@ -88,12 +88,13 @@
             </table>
 
             <!-- FOOTER -->
-            <div class="flex items-center justify-between px-6 py-4 text-sm text-gray-500">
-                <p>Showing 1 to 5 of 42 results</p>
-                <div class="flex gap-2">
-                    <button class="px-2 py-1 border rounded">‹</button>
-                    <button class="px-2 py-1 border rounded">›</button>
-                </div>
+            <div class="flex items-center justify-between px-6 py-4 text-sm text-gray-500 border-t">
+                <p>
+                    Showing {{ $suppliers->firstItem() ?? 0 }} to {{ $suppliers->lastItem() ?? 0 }}
+                    of {{ $suppliers->total() }} results
+                </p>
+
+                {{ $suppliers->links() }}
             </div>
 
         </div>

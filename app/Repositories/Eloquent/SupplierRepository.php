@@ -12,6 +12,11 @@ class SupplierRepository implements SupplierRepositoryInterface
         return Supplier::all();
     }
 
+    public function paginate($perPage = 10)
+    {
+        return Supplier::withCount('cltLayups')->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
     public function find($id)
     {
         return Supplier::findOrFail($id);

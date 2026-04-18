@@ -94,6 +94,9 @@
                 <p class="font-bold">Conflicts detected during import:</p>
                 <ul class="list-disc pl-5">
                     @foreach(session('conflicts') as $conflict)
+                    @php
+                        \Log::info($conflict);
+                    @endphp
                         <li>Layup: {{ $conflict['layup_name'] }}, Layer Order: {{ $conflict['layer_order'] }}</li>
                     @endforeach
                 </ul>
@@ -101,6 +104,9 @@
         @endif
 
         @if(session('manual_conflicts'))
+        @php
+            \Log::info(session('manual_conflicts'));
+        @endphp
             <!-- Conflict Detection Alert -->
             <div class="bg-orange-100 border border-orange-200 rounded-lg p-4 mb-4">
                 <div class="flex items-center gap-3">
@@ -137,7 +143,7 @@
                 <!-- BODY -->
                 <tbody class="divide-y">
 
-                    @foreach ($layups->cltLayups as $layup)
+                    @foreach ($layups as $layup)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4">{{ $layup->id }}</td>
                             <td class="px-6 py-4">
@@ -158,6 +164,18 @@
 
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            @if($layups->hasPages())
+                <div class="flex items-center justify-between px-6 py-4 text-sm text-gray-500 border-t">
+                    <p>
+                        Showing {{ $layups->firstItem() ?? 0 }} to {{ $layups->lastItem() ?? 0 }}
+                        of {{ $layups->total() }} layups
+                    </p>
+
+                    {{ $layups->links() }}
+                </div>
+            @endif
         </div>
 
     </div>

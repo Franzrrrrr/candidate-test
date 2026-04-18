@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,6 +34,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/suppliers/{supplier}/resolve-conflicts', [App\Http\Controllers\ImportExportController::class, 'resolveConflicts'])->name('suppliers.resolve-conflicts');
 
     Route::get('/inventory/{supplier}/{layup}', [InventoryController::class, 'index'])->name('inventory');
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::get('/notifications/{notification}/import-rejected', [NotificationController::class, 'importRejected'])->name('notifications.import-rejected');
+    Route::get('/notifications/{notification}/conflict-details', [NotificationController::class, 'conflictDetails'])->name('notifications.conflict-details');
 });
 
 Route::middleware('auth')->group(function () {

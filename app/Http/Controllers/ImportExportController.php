@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Supplier;
+use App\Models\Notification;
 use App\Services\ImportExportService;
 
 class ImportExportController extends Controller
@@ -53,6 +54,12 @@ class ImportExportController extends Controller
 
         // If conflicts detected, always show the modal for manual resolution
         if (isset($result['conflicts'])) {
+            // If user chose reject, create notification and show conflicts
+            if ($resolution === 'reject') {
+                $this->createImportRejectedNotification($supplier, $result['conflicts'], $data);
+                return redirect()->back()->with('conflicts', $result['conflicts']);
+            }
+
             // If user chose automatic resolution, apply it first
             if ($resolution !== 'manual' && $resolution !== 'reject') {
                 // Apply automatic resolution and show results
@@ -63,7 +70,10 @@ class ImportExportController extends Controller
                 }
             }
 
-            // For manual resolution or reject, show the conflict modal
+            // For manual resolution, create notification and show the conflict modal
+            if ($resolution === 'manual') {
+                $this->createConflictDetectedNotification($supplier, $result['conflicts'], $data);
+            }
             return redirect()->back()->with('manual_conflicts', $result['conflicts']);
         }
 
@@ -126,26 +136,85 @@ class ImportExportController extends Controller
         return false;
     }
 
+    private function createImportRejectedNotification(Supplier $supplier, array $conflicts, array $data)
+    {
+        $user = request()->user();
+
+        $notification = Notification::create([
+            'user_id' => $user->id,
+            'type' => 'import_rejected',
+            'title' => 'Import Rejected - ' . $supplier->name,
+            'message' => 'Import was rejected due to ' . count($conflicts) . ' conflicts detected in the data.',
+            'data' => [
+                'supplier_id' => $supplier->id,
+                'supplier_name' => $supplier->name,
+                'filename' => request()->file('import_file')?->getClientOriginalName() ?? 'Unknown file',
+                'conflicts' => $conflicts,
+                'conflicting_layups' => array_unique(array_column($conflicts, 'layup_name')),
+                'total_layers' => array_reduce($data['clt_layups'] ?? [], function($carry, $layup) {
+                    return $carry + count($layup['clt_layers'] ?? []);
+                }, 0),
+                'import_data' => $data,
+            ],
+        ]);
+    }
+
+    private function createConflictDetectedNotification(Supplier $supplier, array $conflicts, array $data)
+    {
+        $user = request()->user();
+
+        $notification = Notification::create([
+            'user_id' => $user->id,
+            'type' => 'conflict_detected',
+            'title' => 'Conflicts Detected - ' . $supplier->name,
+            'message' => count($conflicts) . ' conflicts detected in import data. Manual resolution required.',
+            'data' => [
+                'supplier_id' => $supplier->id,
+                'supplier_name' => $supplier->name,
+                'filename' => request()->file('import_file')?->getClientOriginalName() ?? 'Unknown file',
+                'conflicts' => $conflicts,
+                'conflicting_layups' => array_unique(array_column($conflicts, 'layup_name')),
+                'total_layers' => array_reduce($data['clt_layups'] ?? [], function($carry, $layup) {
+                    return $carry + count($layup['clt_layers'] ?? []);
+                }, 0),
+                'import_data' => $data,
+            ],
+        ]);
+    }
+
     public function resolveConflicts(Request $request, Supplier $supplier)
     {
+        $request->merge([
+            'resolutions' => json_decode($request->resolutions, true),
+            'conflicts'   => json_decode($request->conflicts, true),
+        ]);
+
         $request->validate([
             'resolutions' => 'required|array',
             'resolutions.*' => 'required|in:keep,accept',
+
+            'conflicts' => 'required|array',
         ]);
 
-        $resolutions = $request->input('resolutions');
-        $conflicts = session('manual_conflicts', []);
+        $resolutions = $request->resolutions;
+        $conflicts   = $request->conflicts;
 
         if (empty($conflicts)) {
             return redirect()->back()->with('error', 'No conflicts found to resolve.');
         }
 
-        $result = $this->importExportService->resolveConflicts($supplier->id, $conflicts, $resolutions);
+        $result = $this->importExportService->resolveConflicts(
+            $supplier->id,
+            $conflicts,
+            $resolutions
+        );
 
-        if (isset($result['success']) && $result['success']) {
-            return redirect()->back()->with('success', 'Conflicts resolved and import completed successfully.');
+        if (!empty($result['success'])) {
+            return redirect()->back()
+                ->with('success', 'Conflicts resolved and import completed successfully.');
         }
 
-        return redirect()->back()->with('error', 'Failed to resolve conflicts.');
+        return redirect()->back()
+            ->with('error', 'Failed to resolve conflicts.');
     }
 }

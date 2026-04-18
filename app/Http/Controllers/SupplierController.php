@@ -16,13 +16,13 @@ class SupplierController extends Controller
 
     public function index()
     {
-        $suppliers = $this->supplierService->getAllSuppliers();
+        $suppliers = $this->supplierService->getPaginatedSuppliers(10);
         return view('pages.suppliers.suppliers', ['suppliers' => $suppliers]);
     }
 
     public function show(\App\Models\Supplier $supplier)
     {
-        $layups = $supplier->load('cltLayups');
+        $layups = $supplier->cltLayups()->withCount('cltLayers')->orderBy('created_at', 'desc')->paginate(10);
         return view('pages.suppliers.show-supplier', ['supplier' => $supplier, 'layups' => $layups]);
     }
 

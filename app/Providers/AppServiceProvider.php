@@ -21,5 +21,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Supplier::observe(\App\Observers\SupplierObserver::class);
+
+        // Use custom pagination view
+        \Illuminate\Pagination\Paginator::defaultView('vendor.pagination.bootstrap-4');
+        \Illuminate\Pagination\Paginator::defaultSimpleView('vendor.pagination.simple-bootstrap-4');
     }
 }

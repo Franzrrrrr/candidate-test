@@ -5,6 +5,7 @@ namespace App\Repositories\Contracts;
 interface SupplierRepositoryInterface
 {
     public function all();
+    public function paginate($perPage = 10);
     public function find($id);
     public function findByExtId($extId);
     public function create(array $data);
