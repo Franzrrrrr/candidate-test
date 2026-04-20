@@ -54,7 +54,7 @@ If:
 - A layer with the same `layer_order` exists within that layup,
 - **AND** one or more fields differ (`thickness`, `width`, `angle`),
 
-→ This must be treated as a conflict.
+    → This must be treated as a conflict.
 
 ---
 

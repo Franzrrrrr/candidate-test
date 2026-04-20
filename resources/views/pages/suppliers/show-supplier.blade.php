@@ -24,7 +24,7 @@
                 </p>
             </div>
 
-            <button class="border px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
+            <button x-data x-on:click="$dispatch('open-modal', 'update-supplier')"  class="border px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100">
                 ✏️ Edit Supplier
             </button>
         </div>
@@ -153,6 +153,7 @@
                             </td>
                             <td class="px-6 py-4 text-right flex items-center justify-end gap-3">
                                 <a href="{{ route('inventory', [$supplier, $layup]) }}" class="text-green-600 hover:underline text-sm">View Layers</a>
+                                <x-update-layup-modal :layup="$layup" :supplier="$supplier" />
                                 <form action="{{ route('layups.destroy', [$supplier, $layup]) }}" method="POST" onsubmit="return confirm('Delete this layup?');">
                                     @csrf
                                     @method('DELETE')
@@ -179,51 +180,6 @@
         </div>
 
     </div>
-
-    <!-- <x-modal name="import-layup">
-        <form method="POST" action="{{ route('suppliers.import', $supplier) }}" enctype="multipart/form-data" class="p-6">
-            @csrf
-
-            <h2 class="text-lg font-semibold mb-4">Import Layups</h2>
-
-            <div class="mb-4">
-                <label class="block text-sm mb-1">JSON File</label>
-                <input
-                    type="file"
-                    name="import_file"
-                    accept=".json,application/json"
-                    class="w-full border rounded p-2"
-                    required
-                >
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm mb-1">Conflict Resolution</label>
-                <select name="conflict_resolution" class="w-full border rounded p-2">
-                    <option value="reject">Reject Import</option>
-                    <option value="overwrite">Overwrite Existing</option>
-                    <option value="skip">Skip Conflict</option>
-                </select>
-            </div>
-
-            <div class="flex justify-end gap-2">
-                <button
-                    type="button"
-                    class="px-4 py-2 border rounded"
-                    x-on:click="$dispatch('close-modal', 'import-layup')"
-                >
-                    Cancel
-                </button>
-
-                <button
-                    type="submit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded"
-                >
-                    Import
-                </button>
-            </div>
-        </form>
-    </x-modal> -->
 
     <x-modal name="import-layup" maxWidth="2xl">
         <form method="POST"

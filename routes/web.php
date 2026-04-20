@@ -17,6 +17,8 @@ Route::get('/suppliers', [App\Http\Controllers\SupplierController::class, 'index
 
 Route::get('/suppliers/show/{supplier}', [App\Http\Controllers\SupplierController::class, 'show'])->middleware(['auth', 'verified'])->name('suppliers.show');
 Route::post('/suppliers', [App\Http\Controllers\SupplierController::class, 'store'])->middleware(['auth', 'verified'])->name('suppliers.store');
+Route::put('/suppliers/{supplier}', [App\Http\Controllers\SupplierController::class, 'update'])->middleware(['auth', 'verified'])->name('suppliers.update');
+Route::delete('/suppliers/{supplier}', [App\Http\Controllers\SupplierController::class, 'destroy'])->middleware(['auth', 'verified'])->name('suppliers.destroy');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Layups
@@ -36,13 +38,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/inventory/{supplier}/{layup}', [InventoryController::class, 'index'])->name('inventory');
 
     // Notifications
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
-    Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
-    Route::get('/notifications/{notification}/import-rejected', [NotificationController::class, 'importRejected'])->name('notifications.import-rejected');
-    Route::get('/notifications/{notification}/conflict-details', [NotificationController::class, 'conflictDetails'])->name('notifications.conflict-details');
+  Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+
+Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
+
+Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+
+Route::get('/notifications/{notification}/import-rejected', [NotificationController::class, 'importRejected'])->name('notifications.import-rejected');
+
+Route::get('/notifications/{notification}/conflict-details', [NotificationController::class, 'conflictDetails'])->name('notifications.conflict-details');
+
+Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+
+Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
 });
 
 Route::middleware('auth')->group(function () {

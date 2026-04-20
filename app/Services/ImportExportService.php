@@ -33,7 +33,6 @@ class ImportExportService
 
     public function importBySupplier($supplierId, array $data, $conflictResolution = 'reject', $isDryRun = false)
     {
-        // dd([$supplierId,'data' => $data, 'conflictResolution' => $conflictResolution, 'isDryRun' => $isDryRun]);
         // conflictResolution: reject, overwrite, skip, duplicate, manual
 
         $supplier = $this->supplierRepo->find($supplierId);
@@ -48,7 +47,6 @@ class ImportExportService
 
         // Always detect conflicts first
         $conflicts = $this->detectConflicts($supplierId, $importedLayups);
-        // dd($conflicts);
 
         // If conflicts exist and strategy is reject, return conflicts
         if ($conflictResolution === 'reject' && !empty($conflicts)) {
@@ -197,7 +195,6 @@ class ImportExportService
             }
         }
 
-
         return $conflicts;
     }
 
@@ -205,9 +202,9 @@ class ImportExportService
     {
         // If layer_order matches AND (thickness OR width OR angle) differ
         return (
-            (float) $existingLayer->thickness != (float) $importedLayer['thickness'] ||
-            (float) $existingLayer->width != (float) $importedLayer['width'] ||
-            (float) $existingLayer->angle != (float) $importedLayer['angle']
+            (float) $existingLayer->thickness == (float) $importedLayer['thickness'] &&
+            (float) $existingLayer->width == (float) $importedLayer['width'] &&
+            (float) $existingLayer->angle == (float) $importedLayer['angle']
         );
     }
 

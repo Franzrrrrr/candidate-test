@@ -30,13 +30,44 @@ class SupplierController extends Controller
     {
         $request->validate([
             'name' => 'required',
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string',
+            'address' => 'nullable|string',
         ]);
 
         $this->supplierService->createSupplier([
             'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
             // 'ext_id' is nullable or handled if needed
         ]);
 
         return redirect()->route('suppliers')->with('success', 'Supplier created successfully.');
+    }
+
+    public function update(Request $request, \App\Models\Supplier $supplier)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string',
+            'address' => 'nullable|string',
+        ]);
+
+        $this->supplierService->updateSupplier($supplier, [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
+
+        return redirect()->route('suppliers')->with('success', 'Supplier updated successfully.');
+    }
+
+    public function destroy(\App\Models\Supplier $supplier)
+    {
+        $this->supplierService->deleteSupplier($supplier);
+        return redirect()->route('suppliers')->with('success', 'Supplier deleted successfully.');
     }
 }

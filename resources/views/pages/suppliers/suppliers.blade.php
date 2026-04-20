@@ -81,7 +81,9 @@
                             </td>
                             <td class="px-6 py-4">{{ $supplier->cltLayups->count() }}</td>
                             <td class="px-6 py-4">{{ $supplier->created_at->format('M j, Y') ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 text-right">•••</td>
+                            <td class="px-6 py-4 text-right">
+                                <x-update-supplier-modal :supplier="$supplier" />
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

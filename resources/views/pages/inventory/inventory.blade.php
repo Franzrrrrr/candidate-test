@@ -110,6 +110,7 @@
                                 <td class="px-4 py-3">{{ number_format($layer->width, 2) }}mm</td>
                                 <td class="px-4 py-3 {{ $layer->angle == 0 ? 'text-green-600' : 'text-orange-500' }}">{{ $layer->angle }}°</td>
                                 <td class="px-4 py-3 text-right">
+                                    <x-update-layer-modal :layer="$layer" :layup="$layup" />
                                     <form action="{{ route('layers.destroy', [$layup, $layer]) }}" method="POST" class="inline" onsubmit="return confirm('Delete this layer?');">
                                         @csrf
                                         @method('DELETE')

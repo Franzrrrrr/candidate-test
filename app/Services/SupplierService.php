@@ -38,13 +38,13 @@ class SupplierService
         return $this->supplierRepository->create($data);
     }
 
-    public function updateSupplier($id, array $data)
+    public function updateSupplier($supplier, array $data)
     {
-        return $this->supplierRepository->update($id, $data);
+        return $this->supplierRepository->update($supplier->id, $data);
     }
 
-    public function deleteSupplier($id)
+    public function deleteSupplier($supplier)
     {
-        return $this->supplierRepository->delete($id);
+        return $this->supplierRepository->delete($supplier->id);
     }
 }
